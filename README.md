@@ -1,13 +1,13 @@
-# <img src="https://raw.githubusercontent.com/twitter/twemoji/master/assets/svg/1f6e1.svg" width="30"> Axiora - Multi-Purpose Discord Bot
+# <img src="https://raw.githubusercontent.com/twitter/twemoji/master/assets/svg/1f6e1.svg" width="30"> Axiora
 
 > **A modern, modular, and powerful Discord moderation & security bot built with Discord.js v14.**
 
 Axiora is designed to provide everything a Discord community needs—from moderation and security to automation and server management. The project is built with scalability in mind, allowing new systems to be added without changing the core architecture.
 
---- 
 <p align="center">
     <img src="https://cdn.discordapp.com/attachments/1524325027611279395/1526610416531148890/Design_2.png?ex=6a57a63e&is=6a5654be&hm=f5246786225f2518f101a446222c68fb624d539304da2836557bfea1178ca99a&animated=true" alt="Axiora Banner">
 </p>
+
 ---
 
 ## ✨ Features
