@@ -17,16 +17,16 @@ const client = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildModeration,
-        GatewayIntentBits.GuildPresences,
         GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildBans,
-        GatewayIntentBits.GuildEmojisAndStickers,
-        GatewayIntentBits.GuildIntegrations,
-        GatewayIntentBits.GuildWebhooks,
         GatewayIntentBits.GuildInvites,
+        GatewayIntentBits.GuildBans,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildEmojisAndStickers,
+        GatewayIntentBits.GuildWebhooks,
+        GatewayIntentBits.GuildIntegrations,
         GatewayIntentBits.GuildScheduledEvents,
+        GatewayIntentBits.GuildPresences,
         GatewayIntentBits.DirectMessages,
         GatewayIntentBits.DirectMessageReactions,
         GatewayIntentBits.DirectMessageTyping
@@ -36,14 +36,11 @@ const client = new Client({
 client.commands = new Collection();
 const slashCommands = [];
 
-// ==========================
-// Load Commands (Recursive)
-// ==========================
-
 function loadCommands(dir) {
     const files = fs.readdirSync(dir);
 
     for (const file of files) {
+
         const filePath = path.join(dir, file);
         const stat = fs.statSync(filePath);
 
@@ -54,30 +51,33 @@ function loadCommands(dir) {
 
         if (!file.endsWith(".js")) continue;
 
-        const command = require(filePath);
+        try {
 
-        if (!command.data || !command.execute) {
-            console.log(`[WARNING] ${filePath} is missing data or execute.`);
-            continue;
+            const command = require(filePath);
+
+            if (!command.data || !command.execute) {
+                console.warn(`[WARNING] ${filePath} is missing data or execute.`);
+                continue;
+            }
+
+            client.commands.set(command.data.name, command);
+            slashCommands.push(command.data.toJSON());
+        } catch (err) {
+
+            console.error(`[ERROR] Failed to load command: ${filePath}`);
+            console.error(err);
+
         }
 
-        client.commands.set(command.data.name, command);
-        slashCommands.push(command.data.toJSON());
-
-        console.log(`[COMMAND] Loaded ${command.data.name}`);
     }
 }
 
-loadCommands(path.join(__dirname, "commands"));
-
-// ==========================
-// Load Events (Recursive)
-// ==========================
-
 function loadEvents(dir) {
+
     const files = fs.readdirSync(dir);
 
     for (const file of files) {
+
         const filePath = path.join(dir, file);
         const stat = fs.statSync(filePath);
 
@@ -88,32 +88,39 @@ function loadEvents(dir) {
 
         if (!file.endsWith(".js")) continue;
 
-        const event = require(filePath);
+        try {
 
-        if (!event.name || !event.execute) {
-            console.log(`[WARNING] ${filePath} is missing name or execute.`);
-            continue;
+            const event = require(filePath);
+
+            if (!event.name || !event.execute) {
+                console.warn(`[WARNING] ${filePath} is missing name or execute.`);
+                continue;
+            }
+
+            if (event.once) {
+                client.once(event.name, (...args) => event.execute(...args, client));
+            } else {
+                client.on(event.name, (...args) => event.execute(...args, client));
+            }
+        } catch (err) {
+
+            console.error(`[ERROR] Failed to load event: ${filePath}`);
+            console.error(err);
+
         }
 
-        if (event.once) {
-            client.once(event.name, (...args) => event.execute(...args, client));
-        } else {
-            client.on(event.name, (...args) => event.execute(...args, client));
-        }
-
-        console.log(`[EVENT] Loaded ${event.name}`);
     }
+
 }
 
+loadCommands(path.join(__dirname, "commands"));
 loadEvents(path.join(__dirname, "events"));
 
-// ==========================
-// Deploy Slash Commands
-// ==========================
-
 async function deployCommands() {
+
     try {
-        console.log(`[/INFO] Registering ${slashCommands.length} slash command(s)...`);
+
+        console.log(`[/INFO] Registering ${slashCommands.length} command(s)...`);
 
         const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
@@ -127,18 +134,20 @@ async function deployCommands() {
             }
         );
 
-        console.log("[/INFO] Slash commands registered successfully.");
+        console.log("[/INFO] Slash commands registered.");
+
     } catch (err) {
-        console.error("[/ERROR] Failed to register slash commands.");
+
+        console.error("[ERROR] Failed to register slash commands.");
         console.error(err);
+
     }
+
 }
 
-// ==========================
-// Login
-// ==========================
-
 (async () => {
+
     await deployCommands();
     await client.login(process.env.TOKEN);
+
 })();
