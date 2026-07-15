@@ -29,8 +29,6 @@ function loadButtons(dir = __dirname) {
 
             buttons.set(button.customId, button);
 
-            console.log(`[BUTTON] Loaded ${button.customId}`);
-
         } catch (err) {
 
             console.error(`[ERROR] Failed to load button: ${filePath}`);
