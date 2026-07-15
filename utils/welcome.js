@@ -1,4 +1,7 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle } = require("discord.js");
 const { loadJSON } = require("./database");
 
 async function sendWelcome(member) {
@@ -32,9 +35,18 @@ async function sendWelcome(member) {
             })
             .setTimestamp();
 
+        const row = new ActionRowBuilder().addComponents(
+
+    new ButtonBuilder()
+        .setLabel("Verify Now!")
+        .setStyle(ButtonStyle.Link)
+        .setURL("https://discord.com/channels/1524324950868099154/1526859037675618324/1526859287479976017"),
+
+);
     await channel.send({
         embeds: [embed],
-        content: `Hey <@${member.user.id}>!`
+        content: `Hey <@${member.user.id}>!`,
+        components: [row]
     });
 
 }
