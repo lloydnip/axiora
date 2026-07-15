@@ -1,132 +1,153 @@
 const {
     SlashCommandBuilder,
     PermissionFlagsBits,
-    EmbedBuilder
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle
 } = require("discord.js");
 
 const { loadJSON } = require("../../utils/database");
 
 module.exports = {
+
     data: new SlashCommandBuilder()
         .setName("security")
-        .setDescription("View the server's security configuration.")
+        .setDescription("View the Axiora Security Center.")
         .setDefaultMemberPermissions(
             PermissionFlagsBits.Administrator
         ),
 
     async execute(interaction) {
 
-        const db = loadJSON("security.json");
+        const security = loadJSON("security.json");
+        const antinuke = loadJSON("antinuke.json");
+        const verification = loadJSON("verification.json");
+        const antispam = loadJSON("antispam.json");
+        const antilink = loadJSON("antilink.json");
+        const antibot = loadJSON("antibot.json");
 
-        const guildData = db[interaction.guild.id] || {};
+        const guildId = interaction.guild.id;
 
-        const lockdown = guildData.lockdown || {};
+        const lockdown =
+            security[guildId]?.lockdown || {};
 
-        const ignored =
-            lockdown.ignoredChannels || [];
+        const antiNuke =
+            antinuke[guildId] || {};
 
-        const role =
-            lockdown.role
-                ? `<@&${lockdown.role}>`
-                : "`Not Configured`";
+        const verify =
+            verification[guildId] || {};
 
-        const moderator =
-            lockdown.moderator
-                ? `<@${lockdown.moderator}>`
-                : "`None`";
+        const antiSpam =
+            antispam[guildId] || {};
 
-        const started =
-            lockdown.timestamp
-                ? `<t:${Math.floor(lockdown.timestamp / 1000)}:F>\n<t:${Math.floor(lockdown.timestamp / 1000)}:R>`
-                : "`Never`";
+        const antiLink =
+            antilink[guildId] || {};
+
+        const antiBot =
+            antibot[guildId] || {};
+
+        // Security Score
+
+        let score = 0;
+
+        if (lockdown.active) score += 20;
+        if (antiNuke.enabled) score += 20;
+        if (verify.enabled) score += 20;
+        if (antiSpam.enabled) score += 20;
+        if (antiLink.enabled) score += 20;
+
+        let rating = "Poor 🔴";
+
+        if (score >= 100)
+            rating = "Excellent 🟢";
+        else if (score >= 80)
+            rating = "Great 🟢";
+        else if (score >= 60)
+            rating = "Good 🟡";
+        else if (score >= 40)
+            rating = "Fair 🟠";
 
         const embed = new EmbedBuilder()
-            .setColor(
-                lockdown.active
-                    ? "Red"
-                    : "Green"
-            )
+
+            .setColor("#5865F2")
+
             .setAuthor({
-                name: `${interaction.guild.name} Security Dashboard`,
+                name: `${interaction.guild.name} Security Center`,
                 iconURL: interaction.guild.iconURL()
             })
+
             .setThumbnail(interaction.guild.iconURL())
 
-            .addFields(
+            .setDescription(
+`# 🛡 Axiora Security
 
-                {
-                    name: "🔒 Lockdown",
-                    value: lockdown.active
-                        ? "🟢 Active"
-                        : "⚪ Inactive",
-                    inline: true
-                },
+Welcome to the **Axiora Security Center**.
 
-                {
-                    name: "👮 Bypass Role",
-                    value: role,
-                    inline: true
-                },
+### Overall Security
 
-                {
-                    name: "🚫 Ignored Channels",
-                    value: `${ignored.length}`,
-                    inline: true
-                },
+> **Score:** **${score}/100**
+> **Rating:** **${rating}**
 
-                {
-                    name: "📝 Reason",
-                    value: lockdown.reason || "`None`",
-                    inline: false
-                },
+## Systems
 
-                {
-                    name: "👤 Moderator",
-                    value: moderator,
-                    inline: true
-                },
+🔒 **Lockdown**
+${lockdown.active ? "🟢 Enabled" : "⚪ Disabled"}
 
-                {
-                    name: "📅 Started",
-                    value: started,
-                    inline: true
-                },
+🛡 **Anti-Nuke**
+${antiNuke.enabled ? "🟢 Enabled" : "⚪ Disabled"}
 
-                {
-                    name: "🛡️ Anti-Nuke",
-                    value: "`Coming Soon`",
-                    inline: true
-                },
+🎫 **Verification**
+${verify.enabled ? "🟢 Enabled" : "⚪ Disabled"}
 
-                {
-                    name: "🤖 Anti-Bot",
-                    value: "`Coming Soon`",
-                    inline: true
-                },
-
-                {
-                    name: "📨 Anti-Spam",
-                    value: "`Coming Soon`",
-                    inline: true
-                },
-
-                {
-                    name: "🔗 Anti-Link",
-                    value: "`Coming Soon`",
-                    inline: true
-                }
-
+Use the buttons below to manage each security module.`
             )
 
             .setFooter({
-                text: `Axiora Security • ${interaction.guild.name}`
+                text: "Page 1/6 • Overview • Axiora Security"
             })
 
             .setTimestamp();
 
+        const row1 = new ActionRowBuilder()
+
+            .addComponents(
+
+                new ButtonBuilder()
+                    .setCustomId("security_overview")
+                    .setLabel("Overview")
+                    .setEmoji("🏠")
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(true),
+
+                new ButtonBuilder()
+                    .setCustomId("security_lockdown")
+                    .setLabel("Lockdown")
+                    .setEmoji("🔒")
+                    .setStyle(ButtonStyle.Secondary),
+
+                new ButtonBuilder()
+                    .setCustomId("security_antinuke")
+                    .setLabel("Anti-Nuke")
+                    .setEmoji("🛡")
+                    .setStyle(ButtonStyle.Secondary),
+
+                new ButtonBuilder()
+                    .setCustomId("security_verification")
+                    .setLabel("Verification")
+                    .setEmoji("🎫")
+                    .setStyle(ButtonStyle.Secondary)
+
+            );
+
         await interaction.reply({
-            embeds: [embed]
+
+            embeds: [embed],
+
+            components: [row1]
+
         });
 
     }
+
 };
