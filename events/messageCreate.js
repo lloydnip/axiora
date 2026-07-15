@@ -13,20 +13,21 @@ module.exports = {
     name: Events.MessageCreate,
 
     async execute(message, client) {
-
-        // Ignore bots
         if (message.author.bot) return;
 
-        // Only accept DMs
         if (message.guild) return;
 
         const session = getSession(message.author.id);
 
         if (!session) return;
 
-        const answer = message.content.trim().toUpperCase();
+        const input = message.content.trim().toUpperCase();
 
-        if (answer !== session.captcha) {
+        const expected = String(session.captcha)
+            .trim()
+            .toUpperCase();
+
+        if (input !== expected) {
 
             session.attempts++;
 
@@ -37,41 +38,37 @@ module.exports = {
                 deleteSession(message.author.id);
 
                 return message.reply({
-
                     embeds: [
-
                         new EmbedBuilder()
-
                             .setColor("Red")
-
                             .setTitle("❌ Verification Failed")
-
                             .setDescription(
-                                "You entered the wrong CAPTCHA **3 times**.\n\nPlease return to the server and click **Verify** again."
+                                "You entered an incorrect CAPTCHA **3 times**.\n\nReturn to the server and press **Verify** to start again."
                             )
-
+                    .setFooter({
+                        text: "Axiora Security",
+                        iconURL: guild.iconURL()
+                    })
+                    .setTimestamp()
                     ]
-
                 });
 
             }
 
             return message.reply({
-
                 embeds: [
-
                     new EmbedBuilder()
-
                         .setColor("Orange")
-
-                        .setTitle("❌ Incorrect CAPTCHA")
-
+                        .setTitle("⚠ Incorrect CAPTCHA")
                         .setDescription(
-                            `That wasn't the correct CAPTCHA.\n\n**Attempts Remaining:** ${remaining}`
+                            `That code is incorrect.\n**Attempts Remaining:** ${remaining}`
                         )
-
+                    .setFooter({
+                        text: "Axiora Security",
+                        iconURL: guild.iconURL()
+                    })
+                    .setTimestamp()
                 ]
-
             });
 
         }
@@ -81,7 +78,6 @@ module.exports = {
         if (!guild) {
 
             deleteSession(message.author.id);
-
             return;
 
         }
@@ -95,62 +91,80 @@ module.exports = {
         } catch {
 
             deleteSession(message.author.id);
-
             return;
 
         }
 
         const config = getConfig(guild.id);
 
-        // Already verified
+        if (!config || !config.role) {
+
+            deleteSession(message.author.id);
+
+            return message.reply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor("Red")
+                        .setTitle("❌ Verification Error")
+                        .setDescription(
+                            "The verification role has not been configured."
+                        )
+                    .setFooter({
+                        text: "Axiora Security",
+                        iconURL: guild.iconURL()
+                    })
+                    .setTimestamp()
+                ]
+            });
+
+        }
 
         if (member.roles.cache.has(config.role)) {
 
             deleteSession(message.author.id);
 
             return message.reply({
-
                 embeds: [
-
                     new EmbedBuilder()
-
                         .setColor("Green")
-
-                        .setTitle("✅ Already Verified")
-
+                        .setTitle("You are already verified!")
                         .setDescription(
-                            "You are already verified."
+                            `You already have the verification role in **${guild.name}**.`
                         )
-
+                    .setFooter({
+                        text: "Axiora Security",
+                        iconURL: guild.iconURL()
+                    })
+                    .setTimestamp()
                 ]
-
             });
 
         }
-
 
         try {
 
             await member.roles.add(config.role);
 
-        } catch {
+        } catch (err) {
+
+            console.error(err);
+
+            deleteSession(message.author.id);
 
             return message.reply({
-
                 embeds: [
-
                     new EmbedBuilder()
-
                         .setColor("Red")
-
                         .setTitle("❌ Verification Error")
-
                         .setDescription(
-                            "I couldn't give you the verified role.\nPlease contact a server administrator."
+                            "I couldn't give you the verification role.\nPlease contact a server administrator."
                         )
-
+                    .setFooter({
+                        text: "Axiora Security",
+                        iconURL: guild.iconURL()
+                    })
+                    .setTimestamp()
                 ]
-
             });
 
         }
@@ -158,21 +172,19 @@ module.exports = {
         deleteSession(message.author.id);
 
         await message.reply({
-
             embeds: [
-
                 new EmbedBuilder()
-
                     .setColor("Green")
-
-                    .setTitle("✅ Verification Successful")
-
+                    .setTitle("You have successfully verified!")
                     .setDescription(
-                        `Welcome to **${guild.name}**!\n\nYou now have access to the server.`
+                        `Welcome to **${guild.name}**!\n\nYou have been successfully verified and now have access to the server.`
                     )
-
+                    .setFooter({
+                        text: "Axiora Security",
+                        iconURL: guild.iconURL()
+                    })
+                    .setTimestamp()
             ]
-
         });
 
         if (config.logChannel) {
@@ -181,39 +193,39 @@ module.exports = {
 
             if (channel) {
 
-                const embed = new EmbedBuilder()
-
-                    .setColor("Green")
-
-                    .setTitle("✅ Member Verified")
-
-                    .addFields(
-
-                        {
-                            name: "Member",
-                            value: `${member.user.tag}`,
-                            inline: true
-                        },
-
-                        {
-                            name: "User ID",
-                            value: member.id,
-                            inline: true
-                        },
-
-                        {
-                            name: "Verified At",
-                            value: `<t:${Math.floor(Date.now() / 1000)}:F>`
-                        }
-
-                    )
-
-                    .setThumbnail(member.displayAvatarURL());
-
                 channel.send({
-
-                    embeds: [embed]
-
+                    embeds: [
+                        new EmbedBuilder()
+                            .setColor("Green")
+                            .setTitle("Member Verified")
+                            .setThumbnail(member.displayAvatarURL())
+                            .addFields(
+                                {
+                                    name: "Member",
+                                    value: `${member.user}`,
+                                    inline: true
+                                },
+                                {
+                                    name: "Username",
+                                    value: member.user.tag,
+                                    inline: true
+                                },
+                                {
+                                    name: "User ID",
+                                    value: member.id
+                                },
+                                {
+                                    name: "Verified",
+                                    value: `<t:${Math.floor(Date.now() / 1000)}:F>`
+                                }
+                            )
+                    .setFooter({
+                        text: "Axiora Security",
+                        iconURL: guild.iconURL()
+                    })
+                    .setTimestamp()
+                            .setTimestamp()
+                    ]
                 });
 
             }
