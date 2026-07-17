@@ -28,15 +28,14 @@ Axiora
 ├── commands/
 │   ├── configurations/
 │   ├── moderation/
+│   ├── verification/
 │   └── security/
 │
 ├── events/
 │
 ├── handlers/
 │   ├── buttons/
-│   ├── modals/
-│   ├── selects/
-│   └── autocomplete/
+│   └── wcemb/
 │
 ├── utils/
 │
@@ -78,44 +77,34 @@ Files are automatically generated if they do not already exist.
 
 ---
 
-# 📜 Patch Notes
+# Axiora | Patch Notes v0.0.4
+*Released: July 16–17, 2026*
 
-## v0.0.2
-*Released: July 14, 2026*
+## :wrench: Welcome System Improvements
+The **Welcome System** has been significantly improved with a new **Embed Builder**, allowing server administrators to fully customize welcome messages and embeds through an interactive, button-based interface.
 
-### ✨ Added
+### Updated Commands
+The following commands now use **button-based navigation** for a more intuitive configuration experience:
+- **`/setwelcome`** — Interactive welcome configuration
+- **`/wcemb content`** — Configure welcome content
+- **`/wcemb title`** — Configure the embed title
+- **`/wcemb color`** — Configure the embed color
+- **`/wcemb description`** — Configure the embed description
+- **`/wcemb field`** — Manage embed fields
+- **`/wcemb img`** — Configure author icons, thumbnails, images, and footer icons
+- **`/wcemb footer`** — Configure the embed footer
+- **`/wcemb timestamp`** — Enable or disable the embed timestamp
+- **`/wcemb button`** — Manage link buttons
+- **`/wcemb preview`** — Preview the current welcome embed
+- **`/wcemb reset`** — Reset the welcome embed configuration
+- **`/wcemb variables`** — View all available welcome variables
 
-#### Welcome & Goodbye System
+### Additional Improvements
+- Fixed button navigation for the **`/security`** dashboard.
+- Fixed major bugs and errors on each commands.
+- Welcome System is now logged so administrators can view the latest on the said system.
 
-- `/setwelcome`
-- `/setgoodbye`
-- `/testwelcome`
-- `/testgoodbye`
-
-#### Server Lockdown System
-
-- `/lockdown`
-- `/unlockdown`
-- `/setlockdownrole`
-- `/setlockdownignore`
-- `/removelockdownignore`
-- `/lockdownignored`
-- `/security`
-
-### 🔧 Improvements
-
-- Moderation commands are now restricted to authorized staff members.
-- Added a dynamic bot status and presence system.
-- Improved the internal command and event architecture.
-- Added automatic configuration storage.
-- Introduced button handlers for scalable interaction management.
-
-### 🛡 Infrastructure
-
-- Optimized for 24/7 hosting.
-- Improved performance and error handling.
-- Continued development by **Noviqo Developers**.
-
+> **Axiora **is still under active development. More features, performance improvements, bug fixes, and security enhancements are planned for future updates.
 ---
 
 ## 📄 License
