@@ -1,10 +1,25 @@
 const { Events } = require("discord.js");
-const { sendGoodbye } = require("../utils/goodbye");
+const embedManager = require("../utils/embedManager");
+const buildGoodbyeEmbed = require("../utils/goodbyeEmbed");
 
 module.exports = {
     name: Events.GuildMemberRemove,
 
     async execute(member) {
-        await sendGoodbye(member);
+
+        const config = embedManager.load("goodbye");
+
+        if (!config.channel) return;
+
+        const channel = member.guild.channels.cache.get(config.channel);
+
+        if (!channel) return;
+
+        const embed = buildGoodbyeEmbed(member);
+
+        await channel.send({
+            embeds: [embed]
+        });
+
     }
 };
