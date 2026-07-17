@@ -26,12 +26,20 @@ module.exports = {
         .addSubcommand(sub =>
             sub
                 .setName("author")
-                .setDescription("Set the embed author.")
+                .setDescription("Set or remove the embed author.")
+
                 .addStringOption(option =>
                     option
                         .setName("text")
                         .setDescription("Author text.")
-                        .setRequired(true)
+                        .setRequired(false)
+                )
+
+                .addStringOption(option =>
+                    option
+                        .setName("remove")
+                        .setDescription("Remove the author text.")
+                        .setRequired(false)
                 )
         )
 
