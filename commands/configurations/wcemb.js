@@ -35,7 +35,7 @@ module.exports = {
                         .setRequired(false)
                 )
 
-                .addStringOption(option =>
+                .addBooleanOption(option =>
                     option
                         .setName("remove")
                         .setDescription("Remove the author text.")
