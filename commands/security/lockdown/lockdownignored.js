@@ -16,7 +16,7 @@ module.exports = {
 
     async execute(interaction) {
 
-        const db = loadJSON("security.json");
+        const db = loadJSON("lockdown.json");
 
         if (!db[interaction.guild.id])
             db[interaction.guild.id] = {};
@@ -36,7 +36,7 @@ module.exports = {
 
         db[interaction.guild.id].lockdown.ignoredChannels = ignored;
 
-        saveJSON("security.json", db);
+        saveJSON("lockdown.json", db);
 
         const list = ignored.length
             ? ignored
