@@ -28,7 +28,7 @@ module.exports = {
             interaction.options.getString("reason") ||
             "No reason provided";
 
-        const db = loadJSON("security.json");
+        const db = loadJSON("lockdown.json");
 
         if (!db[interaction.guild.id]) {
             db[interaction.guild.id] = {};
@@ -51,7 +51,7 @@ module.exports = {
             createdAt: Date.now()
         };
 
-        saveJSON("security.json", db);
+        saveJSON("lockdown.json", db);
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
