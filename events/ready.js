@@ -16,7 +16,7 @@ module.exports = {
             status: "dnd",
             activities: [
                 {
-                    name: "Axiora v0.0.3",
+                    name: "Axiora v0.0.5",
                     type: ActivityType.Listening
                 }
             ]
