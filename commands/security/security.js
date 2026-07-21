@@ -89,11 +89,15 @@ ${antiNuke.enabled ? "🟢 Enabled" : "⚪ Disabled"}
 🎫 **Verification**
 ${verify.enabled ? "🟢 Enabled" : "⚪ Disabled"}
 
+🛡 **Anti-Spam**
+${antiSpam.enabled ? "🟢 Enabled" : "⚪ Disabled"}
+
+
 Use the buttons below to manage each security module.`
             )
 
             .setFooter({
-                text: "Page 1/6 • Overview • Axiora Security"
+                text: "Page 1/5 • Overview • Axiora Security"
             })
 
             .setTimestamp();
@@ -105,26 +109,27 @@ Use the buttons below to manage each security module.`
                 new ButtonBuilder()
                     .setCustomId("security_overview")
                     .setLabel("Overview")
-                    .setEmoji("🏠")
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(true),
 
                 new ButtonBuilder()
                     .setCustomId("security_lockdown")
                     .setLabel("Lockdown")
-                    .setEmoji("🔒")
                     .setStyle(ButtonStyle.Secondary),
 
                 new ButtonBuilder()
                     .setCustomId("security_antinuke")
                     .setLabel("Anti-Nuke")
-                    .setEmoji("🛡")
                     .setStyle(ButtonStyle.Secondary),
 
                 new ButtonBuilder()
                     .setCustomId("security_verification")
                     .setLabel("Verification")
-                    .setEmoji("🎫")
+                    .setStyle(ButtonStyle.Secondary),
+
+                new ButtonBuilder()
+                    .setCustomId("security_antispam")
+                    .setLabel("Anti-Spam")
                     .setStyle(ButtonStyle.Secondary)
 
             );
