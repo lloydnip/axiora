@@ -24,8 +24,6 @@ module.exports = {
         const antinuke = loadJSON("antinuke.json");
         const verification = loadJSON("verification.json");
         const antispam = loadJSON("antispam.json");
-        const antilink = loadJSON("antilink.json");
-        const antibot = loadJSON("antibot.json");
 
         const guildId = interaction.guild.id;
 
@@ -41,21 +39,12 @@ module.exports = {
         const antiSpam =
             antispam[guildId] || {};
 
-        const antiLink =
-            antilink[guildId] || {};
-
-        const antiBot =
-            antibot[guildId] || {};
-
-        // Security Score
-
         let score = 0;
 
         if (lockdown.active) score += 20;
         if (antiNuke.enabled) score += 20;
         if (verify.enabled) score += 20;
         if (antiSpam.enabled) score += 20;
-        if (antiLink.enabled) score += 20;
 
         let rating = "Poor 🔴";
 
