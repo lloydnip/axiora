@@ -7,7 +7,7 @@ const {
     ButtonStyle
 } = require("discord.js");
 
-const { loadJSON, saveJSON } = require("../../utils/database");
+const { loadJSON, saveJSON } = require("../../../utils/database");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,23 +17,26 @@ module.exports = {
             option
                 .setName("reason")
                 .setDescription("Reason for the lockdown")
+                .setRequired(false)
         )
         .setDefaultMemberPermissions(
             PermissionFlagsBits.Administrator
         ),
 
     async execute(interaction) {
-
         const reason =
-            interaction.options.getString("reason") || "No reason provided";
+            interaction.options.getString("reason") ||
+            "No reason provided";
 
         const db = loadJSON("security.json");
 
-        if (!db[interaction.guild.id])
+        if (!db[interaction.guild.id]) {
             db[interaction.guild.id] = {};
+        }
 
-        if (!db[interaction.guild.id].lockdown)
+        if (!db[interaction.guild.id].lockdown) {
             db[interaction.guild.id].lockdown = {};
+        }
 
         if (db[interaction.guild.id].lockdown.active) {
             return interaction.reply({
@@ -42,10 +45,10 @@ module.exports = {
             });
         }
 
-        // Save pending request for button handler
         db[interaction.guild.id].lockdown.pending = {
             moderator: interaction.user.id,
-            reason
+            reason: reason,
+            createdAt: Date.now()
         };
 
         saveJSON("security.json", db);
@@ -68,7 +71,8 @@ module.exports = {
             .setColor("Red")
             .setTitle("⚠️ Confirm Lockdown")
             .setDescription(
-                "This action will lock every text channel in the server.\n\nAre you sure?"
+                "This action will lock all text-based channels in this server.\n\n" +
+                "Are you sure you want to continue?"
             )
             .addFields({
                 name: "Reason",
@@ -79,6 +83,5 @@ module.exports = {
             embeds: [embed],
             components: [row]
         });
-
     }
 };
