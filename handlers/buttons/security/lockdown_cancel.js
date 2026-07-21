@@ -9,7 +9,7 @@ module.exports = {
     async execute(interaction) {
 
         const db =
-            loadJSON("security.json");
+            loadJSON("lockdown.json");
 
         const guildId =
             interaction.guild.id;
@@ -23,7 +23,7 @@ module.exports = {
             ].lockdown.pending;
 
             saveJSON(
-                "security.json",
+                "lockdown.json",
                 db
             );
         }
