@@ -1,55 +1,52 @@
-const { Events, EmbedBuilder } = require("discord.js");
+const {
+    Events,
+    EmbedBuilder
+} = require("discord.js");
 
-const buttons = require("../handlers/buttons");
 const embedManager = require("../utils/embedManager");
-const { replaceVariables } = require("../utils/variables");
 
 module.exports = {
     name: Events.InteractionCreate,
 
     async execute(interaction, client) {
 
+        // =========================
+        // SLASH COMMANDS
+        // =========================
+
         if (interaction.isChatInputCommand()) {
 
-            const command = client.commands.get(interaction.commandName);
+            const command = client.commands.get(
+                interaction.commandName
+            );
 
             if (!command) return;
 
             try {
-                await command.execute(interaction, client);
-            } catch (err) {
-                console.error(err);
+                await command.execute(
+                    interaction,
+                    client
+                );
+            } catch (error) {
 
-                if (!interaction.replied && !interaction.deferred) {
-                    await interaction.reply({
-                        content: "❌ An unexpected error occurred.",
+                console.error(
+                    `Error in /${interaction.commandName}:`,
+                    error
+                );
+
+                if (
+                    interaction.replied ||
+                    interaction.deferred
+                ) {
+                    await interaction.followUp({
+                        content:
+                            "❌ An unexpected error occurred.",
                         ephemeral: true
-                    }).catch(() => {});
-                }
-            }
-
-            return;
-        }
-
-        if (interaction.isButton()) {
-
-            const button = buttons.get(interaction.customId);
-
-            if (!button) return;
-
-            try {
-                await button.execute(interaction, client);
-            } catch (err) {
-
-                console.error(err);
-
-                if (interaction.deferred || interaction.replied) {
-                    await interaction.editReply({
-                        content: "❌ An unexpected error occurred."
                     }).catch(() => {});
                 } else {
                     await interaction.reply({
-                        content: "❌ An unexpected error occurred.",
+                        content:
+                            "❌ An unexpected error occurred.",
                         ephemeral: true
                     }).catch(() => {});
                 }
@@ -59,11 +56,80 @@ module.exports = {
         }
 
 
+        // =========================
+        // BUTTONS
+        // =========================
+
+        if (interaction.isButton()) {
+
+            const button = client.buttons.get(
+                interaction.customId
+            );
+
+            if (!button) {
+
+                console.log(
+                    `❌ Button not found: ${interaction.customId}`
+                );
+
+                return interaction.reply({
+                    content:
+                        "❌ This button is not configured correctly.",
+                    ephemeral: true
+                }).catch(() => {});
+            }
+
+            try {
+
+                await button.execute(
+                    interaction,
+                    client
+                );
+
+            } catch (error) {
+
+                console.error(
+                    `Error in button ${interaction.customId}:`,
+                    error
+                );
+
+                if (
+                    interaction.replied ||
+                    interaction.deferred
+                ) {
+                    await interaction.followUp({
+                        content:
+                            "❌ An error occurred while processing this button.",
+                        ephemeral: true
+                    }).catch(() => {});
+                } else {
+                    await interaction.reply({
+                        content:
+                            "❌ An error occurred while processing this button.",
+                        ephemeral: true
+                    }).catch(() => {});
+                }
+            }
+
+            return;
+        }
+
+
+        // =========================
+        // MODALS
+        // =========================
+
         if (interaction.isModalSubmit()) {
-            if (interaction.customId === "welcome_description_modal") {
+
+            if (
+                interaction.customId ===
+                "welcome_description_modal"
+            ) {
 
                 const description =
-                    interaction.fields.getTextInputValue("description");
+                    interaction.fields.getTextInputValue(
+                        "description"
+                    );
 
                 embedManager.update(
                     "welcome",
@@ -73,15 +139,21 @@ module.exports = {
 
                 const embed = new EmbedBuilder()
                     .setColor("Green")
-                    .setTitle("✅ Welcome Description Updated")
+                    .setTitle(
+                        "✅ Welcome Description Updated"
+                    )
                     .setDescription(
                         "The welcome embed description has been updated successfully."
                     )
                     .addFields({
                         name: "Preview",
-                        value: description.length > 1024
-                            ? description.substring(0, 1021) + "..."
-                            : description
+                        value:
+                            description.length > 1024
+                                ? description.substring(
+                                    0,
+                                    1021
+                                ) + "..."
+                                : description
                     })
                     .setTimestamp();
 
@@ -89,10 +161,7 @@ module.exports = {
                     embeds: [embed],
                     ephemeral: true
                 });
-
             }
         }
-
     }
-
 };
