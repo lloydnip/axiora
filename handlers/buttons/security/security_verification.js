@@ -87,7 +87,7 @@ module.exports = {
     )
 
     .setFooter({
-        text: "Development Security Center • Page 4/4 • Verification"
+        text: "Development Security Center • Page 4/5 • Verification"
     })
     .setTimestamp();
 
@@ -98,27 +98,28 @@ module.exports = {
                 new ButtonBuilder()
                     .setCustomId("security_overview")
                     .setLabel("Overview")
-                    .setEmoji("🏠")
                     .setStyle(ButtonStyle.Secondary),
 
                 new ButtonBuilder()
                     .setCustomId("security_lockdown")
                     .setLabel("Lockdown")
-                    .setEmoji("🔒")
                     .setStyle(ButtonStyle.Secondary),
 
                 new ButtonBuilder()
                     .setCustomId("security_antinuke")
                     .setLabel("Anti-Nuke")
-                    .setEmoji("🛡")
                     .setStyle(ButtonStyle.Secondary),
 
                 new ButtonBuilder()
                     .setCustomId("security_verification")
                     .setLabel("Verification")
-                    .setEmoji("🎫")
                     .setStyle(ButtonStyle.Primary)
-                    .setDisabled(true)
+                    .setDisabled(true),
+
+                new ButtonBuilder()
+                    .setCustomId("security_antispam")
+                    .setLabel("Anti-Spam")
+                    .setStyle(ButtonStyle.Secondary)
 
             );
 
