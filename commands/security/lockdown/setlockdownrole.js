@@ -24,7 +24,7 @@ module.exports = {
 
         const role = interaction.options.getRole("role");
 
-        const db = loadJSON("security.json");
+        const db = loadJSON("lockdown.json");
 
         if (!db[interaction.guild.id]) {
             db[interaction.guild.id] = {};
@@ -36,7 +36,7 @@ module.exports = {
 
         db[interaction.guild.id].lockdown.role = role.id;
 
-        saveJSON("security.json", db);
+        saveJSON("lockdown.json", db);
 
         const embed = new EmbedBuilder()
             .setColor("Green")
