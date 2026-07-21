@@ -30,7 +30,7 @@ module.exports = {
 
         const channel = interaction.options.getChannel("channel");
 
-        const db = loadJSON("security.json");
+        const db = loadJSON("lockdown.json");
 
         if (!db[interaction.guild.id]) {
             db[interaction.guild.id] = {};
@@ -56,7 +56,7 @@ module.exports = {
 
         ignored.push(channel.id);
 
-        saveJSON("security.json", db);
+        saveJSON("lockdown.json", db);
 
         const embed = new EmbedBuilder()
             .setColor("Green")
