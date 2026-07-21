@@ -16,7 +16,7 @@ module.exports = {
 
     async execute(interaction) {
 
-        const db = loadJSON("security.json");
+        const db = loadJSON("lockdown.json");
 
         if (
             !db[interaction.guild.id] ||
@@ -62,7 +62,7 @@ module.exports = {
             role: db[interaction.guild.id].lockdown.role
         };
 
-        saveJSON("security.json", db);
+        saveJSON("lockdown.json", db);
 
         const embed = new EmbedBuilder()
             .setColor("Green")
