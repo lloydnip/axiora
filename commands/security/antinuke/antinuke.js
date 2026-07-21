@@ -8,7 +8,7 @@ const {
 const {
     loadJSON,
     saveJSON
-} = require("../../../utils/antinuke");
+} = require("../../../utils/database");
 
 function getConfig(guildId) {
     const db = loadJSON("antinuke.json");
@@ -38,7 +38,7 @@ function getConfig(guildId) {
 module.exports = {
 
     data: new SlashCommandBuilder()
-        .setName("antinuke")
+        .setName("anti-nuke")
         .setDescription("Configure Axiora Anti-Nuke.")
         .setDefaultMemberPermissions(
             PermissionFlagsBits.Administrator
@@ -220,12 +220,41 @@ module.exports = {
                 }
 
                 case "enable":
-                    config.enabled = true;
-                    break;
 
-                case "disable":
-                    config.enabled = false;
-                    break;
+    config.enabled = true;
+
+    saveJSON(
+        "antinuke.json",
+        db
+    );
+
+    return interaction.reply({
+
+        content:
+            "✅ Anti-Nuke has been enabled.",
+
+        ephemeral: true
+
+    });
+
+
+case "disable":
+
+    config.enabled = false;
+
+    saveJSON(
+        "antinuke.json",
+        db
+    );
+
+    return interaction.reply({
+
+        content:
+            "🛑 Anti-Nuke has been disabled.",
+
+        ephemeral: true
+
+    });
 
                 case "punishment":
                     config.punishment =
