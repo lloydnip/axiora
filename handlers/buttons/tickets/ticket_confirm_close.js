@@ -9,6 +9,7 @@ const { createTranscript } = require("../../../utils/transcript");
 module.exports = { 
     customId: "ticket_confirm_close",
     async execute(interaction) {
+        const { client } = interaction;
         const ticket =
             ticketManager.getTicketByChannel(
                 interaction.channel.id
