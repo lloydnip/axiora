@@ -28,7 +28,7 @@ Axiora
 │
 ├── handlers/
 │   ├── buttons/
-│   ├── modals/
+│   ├── dropdowns/
 │   └── wcemb/
 │
 ├── utils/
