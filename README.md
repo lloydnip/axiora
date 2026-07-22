@@ -10,16 +10,6 @@ Axiora is designed to provide everything a Discord community needs—from modera
 
 ---
 
-## ✨ Features
-
-### 🛡️ Moderation
-### 🔒 Security
-### 👋 Welcome & Goodbye
-
-### 🤖 Auto Moderation
-
----
-
 ## 📂 Project Structure
 
 ```
@@ -77,34 +67,55 @@ Files are automatically generated if they do not already exist.
 
 ---
 
-# Axiora | Patch Notes v0.0.4
-*Released: July 16–17, 2026*
+# Axiora | Patch Notes v0.0.5
+*Released: July 18–22, 2026*
 
-## :wrench: Welcome System Improvements
-The **Welcome System** has been significantly improved with a new **Embed Builder**, allowing server administrators to fully customize welcome messages and embeds through an interactive, button-based interface.
+## ✨ New Commands
 
-### Updated Commands
-The following commands now use **button-based navigation** for a more intuitive configuration experience:
-- **`/setwelcome`** — Interactive welcome configuration
-- **`/wcemb content`** — Configure welcome content
-- **`/wcemb title`** — Configure the embed title
-- **`/wcemb color`** — Configure the embed color
-- **`/wcemb description`** — Configure the embed description
-- **`/wcemb field`** — Manage embed fields
-- **`/wcemb img`** — Configure author icons, thumbnails, images, and footer icons
-- **`/wcemb footer`** — Configure the embed footer
-- **`/wcemb timestamp`** — Enable or disable the embed timestamp
-- **`/wcemb button`** — Manage link buttons
-- **`/wcemb preview`** — Preview the current welcome embed
-- **`/wcemb reset`** — Reset the welcome embed configuration
-- **`/wcemb variables`** — View all available welcome variables
+### 📊 Statistics Commands
+- **`/servers`** — View all servers where Axiora is installed.
+- **`/serverinfo`** — View detailed information about a server.
+- **`/avatar`** — View a user's avatar.
+- **`/userinfo`** — View detailed information about a user.
+- **`/channelinfo`** — View detailed information about a channel.
+- **`/roleinfo`** — View detailed information about a role.
 
-### Additional Improvements
-- Fixed button navigation for the **`/security`** dashboard.
-- Fixed major bugs and errors on each commands.
-- Welcome System is now logged so administrators can view the latest on the said system.
+### ⚙️ Welcome System
+- **`/setautorole`** — Configure the role automatically assigned to new members when they join the server.
 
-> **Axiora **is still under active development. More features, performance improvements, bug fixes, and security enhancements are planned for future updates.
+## ✨ New Features
+
+### ⚔️ Anti-Spam System
+A fully configurable Anti-Spam system has been added to help protect your server from spam.
+- **`/anti-spam enable`** — Enable the Anti-Spam system.
+- **`/anti-spam disable`** — Disable the Anti-Spam system.
+- **`/anti-spam punishment`** — Configure the punishment for spam violations.
+- **`/anti-spam messages`** — Set the maximum number of messages allowed.
+- **`/anti-spam interval`** — Set the time interval used to detect spam.
+- **`/anti-spam delete`** — Configure whether spam messages should be deleted.
+- **`/anti-spam ignore channel`** — Ignore a specific channel.
+- **`/anti-spam ignore user`** — Ignore a specific user.
+- **`/anti-spam ignore list`** — View all ignored channels and users.
+- **`/anti-spam logs set`** — Set the channel where Anti-Spam logs are sent.
+
+### 🎫 Ticket System
+The Ticket System is now fully configurable with the following commands:
+- **`/ticket setup supportrole`** — Set the support role for tickets.
+- **`/ticket setup category`** — Set the category where ticket channels are created.
+- **`/ticket setup transcript`** — Set the channel where ticket transcripts are stored.
+- **`/ticket setup panel`** — Configure and send the ticket panel.
+- **`/ticket setup config`** — View the current ticket system configuration.
+
+## 🔧 Improvements
+- Renamed the Anti-Nuke command from **`/antinuke`** to **`/anti-nuke`**.
+- Fixed issues with the Lockdown System not properly locking channels.
+- Improved and fixed Button Handlers.
+- Fixed major bugs and errors across the bot.
+- Fixed bugs and errors in the Verification System.
+- Fixed issues with Button, Modal, and Dropdown interactions.
+- Improved overall system stability and performance.
+
+> Thank you for your patience and continued support. Stay tuned for more updates! 🚀
 ---
 
 ## 📄 License
