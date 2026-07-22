@@ -523,7 +523,7 @@ if (
 
                 const cembed = new EmbedBuilder()
                 .setColor("Green")
-                .setDescription(`:white_check_mark | Your ticket has ben created ${channel}`)
+                .setDescription(`:white_check_mark: | Your ticket has ben created ${channel}`)
 
                 return interaction.reply({
                     embeds: [cembed],
