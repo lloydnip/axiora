@@ -6,7 +6,7 @@ const {
     ButtonStyle
 } = require("discord.js");
 
-const { createCaptcha } = require("../../../utils/captcha");
+const { createCaptcha } = require("../../../utils/veriicationCode");
 
 const {
     getSession,
@@ -14,96 +14,86 @@ const {
 } = require("../../../utils/verificationSessions");
 
 module.exports = {
-
     customId: "verification_retry",
-
     async execute(interaction) {
+        const { client } = interaction
+        try {
+            const session = getSession(interaction.user.id);
 
-        const session = getSession(interaction.user.id);
+            if (!session) {
+                return interaction.reply({
+                    content: "❌ Your verification session has expired.\n\n" + "Please return to the server and press **Verify** again.",
+                    ephemeral: true
+                });
+            }
 
-        if (!session) {
+            const captcha = await createCaptcha();
 
-            return interaction.reply({
-
-                content:
-                    "❌ Your verification session has expired.",
-
-                ephemeral: true
-
-            });
-
-        }
-
-        const captcha = await createCaptcha();
-
-        createSession(interaction.user.id, {
-
-            guildId: session.guildId,
-
-            captcha: captcha.answer,
-
-            attempts: session.attempts,
-
-            createdAt: Date.now()
-
-        });
-
-        const attachment = new AttachmentBuilder(captcha.image, {
-
-            name: "captcha.png"
-
-        });
-
-        const embed = new EmbedBuilder()
-
-            .setColor("Blue")
-
-            .setTitle("🔄 New CAPTCHA")
-
-            .setDescription(
-
-                "Reply with the new CAPTCHA shown below."
-
-            )
-
-            .setImage("attachment://captcha.png");
-
-        const row = new ActionRowBuilder()
-
-            .addComponents(
-
-                new ButtonBuilder()
-
-                    .setCustomId("verification_retry")
-
-                    .setLabel("New CAPTCHA")
-
-                    .setEmoji("🔄")
-
-                    .setStyle(ButtonStyle.Primary),
-
-                new ButtonBuilder()
-
-                    .setCustomId("verification_cancel")
-
-                    .setLabel("Cancel")
-
-                    .setEmoji("❌")
-
-                    .setStyle(ButtonStyle.Danger)
-
+            createSession(interaction.user.id, {
+                    guildId: session.guildId,
+                    captcha: captcha.answer,
+                    attempts: 0,
+                    createdAt: Date.now(),
+                    expiresAt:
+                        Date.now() +
+                        5 * 60 * 1000
+                }
             );
 
-        await interaction.update({
+            const embed = new EmbedBuilder()
+                .setColor("#5865F2")
+                .setTitle("🔄 New CAPTCHA")
+                .setDescription(
+                    "A new CAPTCHA has been generated.\n\n" +
+                    "Reply to this DM with the **6-character code** shown in the image.\n\n" +
+                    "⏳ This CAPTCHA expires in **5 minutes**.\n" +
+                    "🔄 You have **3 attempts**."
+                )
+                .setFooter({
+                    text: "Axiora Security",
+                    iconURL: Client.user.displayAvatarURL()
+                })
+                .setTimestamp();
 
-            embeds: [embed],
+            const row = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId("verification_retry")
+                        .setLabel("New CAPTCHA")
+                        .setEmoji("🔄")
+                        .setStyle(ButtonStyle.Primary),
 
-            files: [attachment],
+                    new ButtonBuilder()
+                        .setCustomId("verification_cancel")
+                        .setLabel("Cancel")
+                        .setEmoji("❌")
+                        .setStyle(ButtonStyle.Danger)
 
-            components: [row]
+                    );
 
-        });
+            await interaction.update({
+                embeds: [embed],
+                components: [row]
+            });
 
+        } catch (error) {
+            console.error("CAPTCHA Retry Error:", error);
+
+            if (
+                interaction.replied ||
+                interaction.deferred
+            ) {
+                return interaction.editReply({
+                    content:"❌ Failed to generate a new CAPTCHA."
+                }).catch(
+                    () => {}
+                );
+            }
+
+            return interaction.reply({
+                content: "❌ Failed to generate a new CAPTCHA.",
+                ephemeral: true
+            });
+        }
     }
-
 };
