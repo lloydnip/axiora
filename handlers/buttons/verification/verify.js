@@ -1,197 +1,226 @@
 const {
     EmbedBuilder,
-    AttachmentBuilder,
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle
 } = require("discord.js");
 
-const { getConfig } = require("../../../utils/verification");
-const { createCaptcha } = require("../../../utils/captcha");
+const {
+    getConfig
+} = require("../../../utils/verification");
+
+const {
+    createVerificationCode
+} = require("../../../utils/verificationCode");
 
 const {
     createSession,
-    hasSession,
+    getSession,
     deleteSession
 } = require("../../../utils/verificationSessions");
 
+
 module.exports = {
-
     customId: "verification_verify",
-
     async execute(interaction) {
-
         await interaction.deferReply({
             ephemeral: true
         });
 
         try {
-
             const config = getConfig(interaction.guild.id);
 
-            if (!config.enabled) {
+            if (
+                !config ||
+                !config.enabled
+            ) {
+                const aembed = new EmbedBuilder()
+                    .setColor("Orange")
+                    .setDescription(`:warning: | Verification is disabled.`)
+
                 return interaction.editReply({
-                    content: "❌ Verification is disabled."
+                    embeds: [aembed],
+                    ephemeral: true
                 });
             }
 
-            if (!config.role) {
+            if (
+                !config.role
+            ) {
+                const bembed = new EmbedBuilder()
+                    .setColor("Orange")
+                    .setDescription(`:warning: | Verification Role is not configured.`)
+
                 return interaction.editReply({
-                    content: "❌ No verification role has been configured."
+                    embeds: [bembed],
+                    ephemeral: true
                 });
             }
 
-            if (interaction.member.roles.cache.has(config.role)) {
+            if (interaction.member.roles.cache.has(config.role)
+            ) {
+                const cembed = new EmbedBuilder()
+                    .setColor("Green")
+                    .setDescription(`:white_check_mark: | You are already verified.`)
+
                 return interaction.editReply({
-                    content: "✅ You are already verified."
+                    embeds: [cembed],
+                    ephemeral: true
                 });
             }
 
-            if (hasSession(interaction.user.id)) {
+            const existingSession = getSession(interaction.user.id);
+
+            if (
+                existingSession
+            ) {
+                const cembed = new EmbedBuilder()
+                    .setColor("Red")
+                    .setDescription(`:x: | You are already have an active verification session. Please check your DMs.`)
+
                 return interaction.editReply({
-                    content: "❌ You already have an active verification session. Check your DMs."
+                    embeds: [cembed],
+                    ephemeral: true
                 });
+
             }
 
-            // Generate CAPTCHA
-            const captcha = await createCaptcha();
+            const code = createVerificationCode();
+            const sessionId = `${interaction.user.id}-${Date.now()}`;
+            const expiresAt = Date.now() + 5 * 60 * 1000;
 
-            // Create verification session
-            createSession(interaction.user.id, {
-                guildId: interaction.guild.id,
-                captcha: captcha.answer,
-                attempts: 0,
-                createdAt: Date.now()
-            });
+            createSession(interaction.user.id,
+                {
+                    guildId: interaction.guild.id,
+                    code: code,
+                    attempts: 0,
+                    createdAt: Date.now(),
+                    expiresAt: expiresAt,
+                    sessionId: sessionId
+                }
+            );
 
-            const attachment = new AttachmentBuilder(captcha.image, {
-                name: "captcha.png"
-            });
-
-const embed = new EmbedBuilder()
-    .setColor("#5865F2")
-    .setAuthor({
-        name: "Axiora Verification",
-        iconURL: interaction.client.user.displayAvatarURL()
-    })
-    .setTitle("🛡 Complete Verification")
-    .setDescription(
-`Welcome to **${interaction.guild.name}**!
-
-Please type the **6-character code** shown in the image below.
-
-### Rules
-• ⏳ Expires in **5 minutes**
-• 🔄 Maximum **3 attempts**
-• 💬 Reply in this DM with only the code
-
-Good luck!`
-    )
-    .setImage("attachment://captcha.png")
-    .setFooter({
-        text: "Axiora Security • CAPTCHA Verification"
-    })
-    .setTimestamp();
+            const embed = new EmbedBuilder()
+                .setColor("#5865F2")
+                .setTitle("🛡 Complete Verification")
+                .setDescription(
+                    `Welcome to **${interaction.guild.name}**!\n\n` +
+                    `Your verification code is:  \`${code}\`` +
+                    "Reply to this DM with **only the 6-digit code**.\n" +
+                    "## Rules\n" +
+                    "• ⏳ Code expires in **5 minutes**\n" +
+                    "• 🔄 Maximum **3 attempts**\n" +
+                    "• 💬 Reply with only the code"
+                )
+                .setFooter({
+                    text: "Axiora Security",
+                    iconURL: interaction.guild.iconURL()
+                })
+                .setTimestamp();
 
             const row = new ActionRowBuilder()
                 .addComponents(
                     new ButtonBuilder()
                         .setCustomId("verification_retry")
-                        .setLabel("New CAPTCHA")
+                        .setLabel("New Code")
                         .setEmoji("🔄")
                         .setStyle(ButtonStyle.Primary),
-
                     new ButtonBuilder()
                         .setCustomId("verification_cancel")
                         .setLabel("Cancel")
                         .setEmoji("❌")
                         .setStyle(ButtonStyle.Danger)
-                );
+                    );
 
-            // Send DM
             try {
+                await interaction.user.send({
+                    embeds: [embed],
+                    components: [row]
+                });
 
-    await interaction.user.send({
-        embeds: [embed],
-        files: [attachment],
-        components: [row]
-    });
+            } catch (error) {
 
-} catch (err) {
-
-    console.error("DM Error:");
-    console.error(err);
-
-    deleteSession(interaction.user.id);
-
-    return interaction.editReply({
-        content: "❌ I couldn't send you a DM. Please enable Direct Messages."
-    });
-
-}
-
-            // Respond to button interaction
-            await interaction.editReply({
-                content: "📩 Check your Direct Messages to continue verification."
-            });
-
-            // Expire after 5 minutes
-            setTimeout(async () => {
-
-                if (!hasSession(interaction.user.id))
-                    return;
+                console.error("DM Error:", error);
 
                 deleteSession(interaction.user.id);
 
-                try {
-
-                    await interaction.user.send({
-
-                        embeds: [
-
-                            new EmbedBuilder()
-
-                                .setColor("Red")
-
-                                .setTitle("⌛ Verification Expired")
-
-                                .setDescription(
-                                    "Your verification session has expired.\n\nPlease return to the server and press **Verify** again."
-                                )
-
-                        ]
-
-                    });
-
-                } catch (err) {
-                    console.error("Failed to send expiration DM:", err);
-                }
-
-            }, 300000);
-
-        } catch (err) {
-
-            console.error("Verification Error:", err);
-
-            deleteSession(interaction.user.id);
-
-            if (interaction.deferred || interaction.replied) {
-
-                await interaction.editReply({
-                    content: "❌ I couldn't send you a DM.\n\nPlease enable **Direct Messages** from this server and try again."
-                }).catch(() => {});
-
-            } else {
-
-                await interaction.reply({
-                    content: "❌ I couldn't send you a DM.",
+                return interaction.editReply({
+                    content: "❌ I couldn't send you a DM.\n\n" + "Please enable Direct Messages from this server and try again.",
                     ephemeral: true
-                }).catch(() => {});
+                });
 
             }
 
+            await interaction.editReply({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor("Blurple")
+                        .setTitle("📩 Check Your DMs")
+                        .setDescription(
+                            "I've sent you a verification code in your DMs.\n\n" +
+                            "Reply to the DM with **only the 6-digit code**."
+                        )
+                        .setFooter({
+                            text: "Axiora Security",
+                            iconURL: interaction.guild.iconURL()
+                        })
+                        .setTimestamp()
+                ]
+            });
+
+            setTimeout(
+                async () => {
+                    const session = etSession(interaction.user.id);
+
+                    if (
+                        !session
+                    ) {
+                        return;
+                    }
+
+                    if (
+                        session.sessionId !==
+                        sessionId
+                    ) {
+                        return;
+                    }
+
+                    deleteSession(interaction.user.id);
+
+                    try {
+                        await interaction.user.send({
+                            embeds: [
+                                new EmbedBuilder()
+                                    .setColor("Red")
+                                    .setTitle("⌛ Verification Code Expired")
+                                    .setDescription(
+                                        "Your verification code has expired.\n\n" +
+                                        "Return to the server and click **Verify** to request a new code."
+                                    )
+                                    .setFooter({
+                                        text: "Axiora Security",
+                                        iconURL: interaction.guild.iconURL()
+                                    })
+                                    .setTimestamp()
+                            ]
+                        });
+                    } catch (error) {
+                        console.error("Expiration DM Error:", error);
+                    }
+                },
+                5 * 60 * 1000
+            );
+
+        } catch (error) {
+            console.error("Verification Error:", error);
+
+            deleteSession(interaction.user.id);
+
+            await interaction.editReply({
+                content: "❌ Something went wrong while starting verification."
+            }).catch(
+                () => {}
+            );
         }
-
     }
-
 };
