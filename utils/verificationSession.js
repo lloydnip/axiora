@@ -5,11 +5,18 @@ function createSession(userId, data) {
 }
 
 function getSession(userId) {
-    return sessions.get(userId);
-}
+    const session = sessions.get(userId);
 
-function hasSession(userId) {
-    return sessions.has(userId);
+    if (!session) {
+        return null;
+    } if (
+        session.expiresAt &&
+        Date.now() > session.expiresAt
+    ) {
+        sessions.delete(userId);
+        return null;
+    }
+    return session;
 }
 
 function deleteSession(userId) {
@@ -19,6 +26,5 @@ function deleteSession(userId) {
 module.exports = {
     createSession,
     getSession,
-    hasSession,
     deleteSession
 };
