@@ -5,6 +5,7 @@ const { deleteSession } = require("../../../utils/verificationSessions");
 module.exports = {
     customId: "verification_cancel",
     async execute(interaction) {
+        const { client } = interaction
         try {
             deleteSession(
                 interaction.user.id
