@@ -170,7 +170,7 @@ module.exports = {
 
             setTimeout(
                 async () => {
-                    const session = etSession(interaction.user.id);
+                    const session = getSession(interaction.user.id);
 
                     if (
                         !session
