@@ -9,15 +9,41 @@ module.exports = {
 
         const config = embedManager.load("welcome");
 
-        if (!config.channel) return;
+        // Welcome message
+        if (config.channel) {
 
-        const channel = member.guild.channels.cache.get(config.channel);
+            const channel = member.guild.channels.cache.get(
+                config.channel
+            );
 
-        if (!channel) return;
+            if (channel) {
+                const message = buildWelcomeEmbed(member);
 
-        const message = buildWelcomeEmbed(member);
+                await channel.send(message);
+            }
+        }
 
-        await channel.send(message);
+        // Autorole
+        if (config.autorole) {
 
+            const role = member.guild.roles.cache.get(
+                config.autorole
+            );
+
+            if (!role) {
+                console.log(
+                    `⚠️ Autorole not found in ${member.guild.name}`
+                );
+
+                return;
+            }
+
+            try {
+
+                await member.roles.add(role);
+
+            } catch (error) {
+            }
+        }
     }
 };
